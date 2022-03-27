@@ -28,11 +28,17 @@ public class SnakeController : MonoBehaviour
     bool runDeath = false;
     bool selfEaten = false;
     bool keyRigistered = false;
+    string HUDButtonPressed = "";
 
     void Start()
     {
         targetPosition = getTargetPosition();
         previousTargetPosition = targetPosition;
+    }
+
+    public void PressHUDButton(string name) 
+    {
+        HUDButtonPressed = name;
     }
 
     void Update()
@@ -44,30 +50,31 @@ public class SnakeController : MonoBehaviour
 
         if (firstPersonMode == false && keyRigistered == false)
         {
-            if (Input.GetKeyDown("up") && wantedDirection != 'D' && wantedDirection != ' ')
+            if ((Input.GetKeyDown("up") || HUDButtonPressed == "up" ) && wantedDirection != 'D' && wantedDirection != ' ')
             {
                 keyRigistered = true;
                 wantedDirection = 'U';
             }
-            else if (Input.GetKeyDown("right") && wantedDirection != 'L')
+            else if ((Input.GetKeyDown("right") || HUDButtonPressed == "right") && wantedDirection != 'L')
             {
                 keyRigistered = true;
                 wantedDirection = 'R';
             }
-            else if (Input.GetKeyDown("left") && wantedDirection != 'R' && wantedDirection != ' ')
+            else if ((Input.GetKeyDown("left") || HUDButtonPressed == "left") && wantedDirection != 'R' && wantedDirection != ' ')
             {
                 keyRigistered = true;
                 wantedDirection = 'L';
             }
-            else if (Input.GetKeyDown("down") && wantedDirection != 'U')
+            else if ((Input.GetKeyDown("down") || HUDButtonPressed == "down") && wantedDirection != 'U')
             {
                 keyRigistered = true;
                 wantedDirection = 'D';
             }
+            HUDButtonPressed = "";
         }
         else if (keyRigistered == false)
         {
-            if (Input.GetKeyDown("up"))
+            if (Input.GetKeyDown("up") || HUDButtonPressed == "up")
             {
                 keyRigistered = true;
                 if (wantedDirection == ' ' || wantedDirection == 'D')
@@ -75,7 +82,7 @@ public class SnakeController : MonoBehaviour
                     wantedDirection = 'D';
                 }
             }
-            else if (Input.GetKeyDown("left"))
+            else if (Input.GetKeyDown("left") || HUDButtonPressed == "left")
             {
                 keyRigistered = true;
                 if (wantedDirection == 'D' || wantedDirection == ' ')
@@ -95,7 +102,7 @@ public class SnakeController : MonoBehaviour
                     wantedDirection = 'U';
                 }
             }
-            else if (Input.GetKeyDown("right"))
+            else if (Input.GetKeyDown("right") || HUDButtonPressed == "right")
             {
                 keyRigistered = true;
                 if (wantedDirection == 'D')
@@ -115,6 +122,7 @@ public class SnakeController : MonoBehaviour
                     wantedDirection = 'D';
                 }
             }
+            HUDButtonPressed = "";
         }
 
         if (wantedDirection == ' ')

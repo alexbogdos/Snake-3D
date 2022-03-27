@@ -8,7 +8,10 @@ public class MainMenu : MonoBehaviour
 {
     [SerializeField] GameObject MainPanel;
     [SerializeField] GameObject SettingsPanel;
-    [SerializeField] Toggle toggle;
+    
+    [SerializeField] Toggle toggleFPV;
+    [SerializeField] Toggle toggleHUD;
+    [SerializeField] Toggle togglePostPrc;
 
     public void GoToPlay()
     {
@@ -20,15 +23,24 @@ public class MainMenu : MonoBehaviour
         MainPanel.SetActive(false);
         SettingsPanel.SetActive(true);
 
-        if (PlayerPrefs.HasKey("FirstPerson"))
+        setToggleValue(toggleFPV, "FirstPerson");
+        setToggleValue(toggleHUD, "HUDButtons");
+        setToggleValue(togglePostPrc, "PostProcessing");
+
+    }
+
+  
+
+    void setToggleValue(Toggle toggle, string prefsKey) 
+    {
+        if (PlayerPrefs.HasKey(prefsKey))
         {
-            toggle.isOn = PlayerPrefs.GetInt("FirstPerson") == 1;
+            toggle.isOn = PlayerPrefs.GetInt(prefsKey) == 1;
         }
         else
         {
             toggle.isOn = false;
         }
-
     }
 
     public void GoToMain()
@@ -37,7 +49,7 @@ public class MainMenu : MonoBehaviour
         MainPanel.SetActive(true);
     }
 
-    public void ChangeValue(bool fp)
+    public void ChangeFPVvalue(bool fp)
     {
         if (fp == false)
         {
@@ -46,6 +58,30 @@ public class MainMenu : MonoBehaviour
         else
         {
             PlayerPrefs.SetInt("FirstPerson", 1);
+        }
+    }
+
+    public void ChangeHUDvalue(bool fp)
+    {
+        if (fp == false)
+        {
+            PlayerPrefs.SetInt("HUDButtons", 0);
+        }
+        else
+        {
+            PlayerPrefs.SetInt("HUDButtons", 1);
+        }
+    }
+
+    public void ChangePostProcessingvalue(bool fp)
+    {
+        if (fp == false)
+        {
+            PlayerPrefs.SetInt("PostProcessing", 0);
+        }
+        else
+        {
+            PlayerPrefs.SetInt("PostProcessing", 1);
         }
     }
 
