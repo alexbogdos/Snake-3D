@@ -9,17 +9,12 @@ public class EndController : MonoBehaviour
     [SerializeField] GameObject buttonContinue;
     [SerializeField] GameObject buttonRestart;
 
-    public void setTitleTo(bool won) 
+    public void setTitleTo()
     {
-        if (won) {
-            title.text = "You Won!";
-            buttonRestart.SetActive(false);
-            buttonContinue.SetActive(true);
-        }
-        else {
-            title.text = "You Lost..";
-            buttonContinue.SetActive(false);
-            buttonRestart.SetActive(true);
-        }
+
+        title.text = "You Lost..";
+        buttonContinue.SetActive(false);
+        buttonRestart.SetActive(true);
+
     }
 }

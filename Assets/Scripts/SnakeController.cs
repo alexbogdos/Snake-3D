@@ -19,8 +19,8 @@ public class SnakeController : MonoBehaviour
     [SerializeField] float countdownTime = 1;
 
     char wantedDirection = ' ';
-    Vector3 targetPosition;
-    Vector3 previousTargetPosition;
+    public Vector3 targetPosition;
+    public Vector3 previousTargetPosition;
     Vector3 lastBodyPreviousPosition;
     List<GameObject> bodyParts = new List<GameObject>();
     List<Vector3> positionHistory = new List<Vector3>();
@@ -36,7 +36,7 @@ public class SnakeController : MonoBehaviour
         previousTargetPosition = targetPosition;
     }
 
-    public void PressHUDButton(string name) 
+    public void PressHUDButton(string name)
     {
         HUDButtonPressed = name;
     }
@@ -50,7 +50,7 @@ public class SnakeController : MonoBehaviour
 
         if (firstPersonMode == false && keyRigistered == false)
         {
-            if ((Input.GetKeyDown("up") || HUDButtonPressed == "up" ) && wantedDirection != 'D' && wantedDirection != ' ')
+            if ((Input.GetKeyDown("up") || HUDButtonPressed == "up") && wantedDirection != 'D' && wantedDirection != ' ')
             {
                 keyRigistered = true;
                 wantedDirection = 'U';
@@ -133,24 +133,17 @@ public class SnakeController : MonoBehaviour
         moveToTarget();
         checkCollision();
 
-        (bool, bool) appleData = appleController.checkIfInPosition(targetPosition);
-        if (appleData.Item1)
+        bool eaten = appleController.checkIfInPosition(targetPosition);
+        if (eaten)
         {
             growSnake();
         }
 
-        if ((outOfBounds == true || selfEaten == true || appleData.Item2) && runDeath == false)
+        if ((outOfBounds == true || selfEaten == true) && runDeath == false)
         {
-            if (appleData.Item2)
-            {
-                StartCoroutine(runDeathScene(1f, true));
-                runDeath = true;
-            }
-            else
-            {
-                StartCoroutine(runDeathScene(0f, false));
-                runDeath = true;
-            }
+
+            StartCoroutine(runDeathScene(0f));
+            runDeath = true;
         }
 
         if (positionHistory.Count == 0)
@@ -166,7 +159,7 @@ public class SnakeController : MonoBehaviour
         }
     }
 
-    IEnumerator runDeathScene(float _time, bool won)
+    IEnumerator runDeathScene(float _time)
     {
         yield return new WaitForSeconds(_time);
         Time.timeScale = 0.50f;
@@ -186,7 +179,7 @@ public class SnakeController : MonoBehaviour
         }
         gamePlayController.SetButtonAsPaused();
         EndPanel.SetActive(true);
-        EndPanel.GetComponent<EndController>().setTitleTo(won);
+        EndPanel.GetComponent<EndController>().setTitleTo();
     }
 
     void growSnake()
@@ -212,7 +205,11 @@ public class SnakeController : MonoBehaviour
             body.transform.rotation = transform.rotation;
         }
 
-        movementSpeed += speedStep;
+        if (appleController.applesEaten % 5 == 0)
+        {
+            movementSpeed += speedStep;
+        }
+
     }
 
     void checkCollision()
