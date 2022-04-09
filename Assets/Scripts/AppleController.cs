@@ -24,8 +24,6 @@ public class AppleController : MonoBehaviour
 
     void SpawnApples()
     {
-        remainingApples = 3;
-
         Vector3 snakeTargetPosition = snakeController.targetPosition;
         List<List<(int, int)>> availableZones = new List<List<(int, int)>> {
             new List<(int, int)> {
@@ -58,16 +56,34 @@ public class AppleController : MonoBehaviour
         availableZones.RemoveAt(zone - 1);
 
         List<Vector3> spawnPositions = new List<Vector3>();
-        for (int i = 1; i <= 3; i++)
-        {
-            System.Random rand = new System.Random();
-            int zoneIndex = rand.Next(availableZones.Count - 1);
-            List<(int, int)> positions = availableZones[zoneIndex];
-            int positionIndex = rand.Next(positions.Count - 1);
-            Vector3 position = new Vector3(x: positions[positionIndex].Item1, y: 0.3f, z: positions[positionIndex].Item2);
-            spawnPositions.Add(position);
+        System.Random rand = new System.Random();
+        int rate = rand.Next(minValue: 2, maxValue: 6);
+        remainingApples += rate;
 
-            availableZones.RemoveAt(zoneIndex);
+        for (int i = 1; i <= rate; i++)
+        {
+            bool isUsed;
+            bool isNearOthers = false;
+            int zoneIndex;
+            Vector3 position;
+            int positionIndex;
+            zoneIndex = rand.Next(availableZones.Count);
+            List<(int, int)> positions = availableZones[zoneIndex];
+
+            do
+            {
+                positionIndex = rand.Next(positions.Count - 1);
+                position = new Vector3(x: positions[positionIndex].Item1, y: 0.3f, z: positions[positionIndex].Item2);
+
+                isUsed = checkIfUsed(position);
+
+                isNearOthers = checkIfNearOthers(position, spawnPositions);
+
+
+            } while (!(isUsed == false && isNearOthers == false));
+
+            spawnPositions.Add(position);
+            availableZones[zoneIndex].RemoveAt(positionIndex);
         }
 
         foreach (Vector3 position in spawnPositions)
@@ -76,6 +92,72 @@ public class AppleController : MonoBehaviour
             Apples.Add(appleInstance);
             Destroyed.Add(false);
         }
+    }
+
+    bool checkIfNearOthers(Vector3 position, List<Vector3> list)
+    {
+        bool isNearOthers = false;
+        int _index = 0;
+        while (isNearOthers == false && _index < list.Count)
+        {
+            Vector3 pos = list[_index];
+
+            Vector3 left = new Vector3(x: position.x - 2, z: position.z, y: position.y);
+            Vector3 right = new Vector3(x: position.x + 2, z: position.z, y: position.y);
+            Vector3 top = new Vector3(x: position.x, z: position.z + 2, y: position.y);
+            Vector3 bottom = new Vector3(x: position.x, z: position.z - 2, y: position.y);
+
+            if (pos == left || pos == right || pos == top || pos == bottom)
+            {
+                isNearOthers = true;
+            }
+
+            _index++;
+        }
+
+        if (isNearOthers == true)
+        {
+            return isNearOthers;
+        }
+
+
+        _index = 0;
+        while (isNearOthers == false && _index < Apples.Count)
+        {
+            if (Destroyed[_index] == false)
+            {
+                Vector3 pos = Apples[_index].transform.position;
+
+                Vector3 left = new Vector3(x: position.x - 2, z: position.z, y: position.y);
+                Vector3 right = new Vector3(x: position.x + 2, z: position.z, y: position.y);
+                Vector3 top = new Vector3(x: position.x, z: position.z + 2, y: position.y);
+                Vector3 bottom = new Vector3(x: position.x, z: position.z - 2, y: position.y);
+
+                if (pos == left || pos == right || pos == top || pos == bottom)
+                {
+                    isNearOthers = true;
+                }
+            }
+
+            _index++;
+        }
+
+        return isNearOthers;
+    }
+    bool checkIfUsed(Vector3 position)
+    {
+        bool isUsed = false;
+        int _index = 0;
+        while (isUsed == false && _index < Apples.Count)
+        {
+            Vector3 pos = Apples[_index].transform.position;
+            if (position == pos)
+            {
+                isUsed = true;
+            }
+            _index++;
+        }
+        return isUsed;
     }
 
     int checkCurrentZone(Vector3 position)
@@ -105,6 +187,24 @@ public class AppleController : MonoBehaviour
     }
 
 
+    public void saveData()
+    {
+        PlayerPrefs.SetInt("Score", applesEaten);
+
+        if (PlayerPrefs.HasKey("HighScore"))
+        {
+            int highScore = PlayerPrefs.GetInt("HighScore");
+            if (applesEaten > highScore)
+            {
+                PlayerPrefs.SetInt("HighScore", applesEaten);
+            }
+        }
+        else
+        {
+            PlayerPrefs.SetInt("HighScore", applesEaten);
+        }
+    }
+
     public bool checkIfInPosition(Vector3 position)
     {
         int index = 0;
@@ -125,12 +225,22 @@ public class AppleController : MonoBehaviour
                     source.PlayDelayed(audioDelay);
 
                     remainingApples--;
-                    if (remainingApples == 0) 
+                    StartCoroutine(DestroyEatenApples());
+
+                    if (remainingApples == 1)
+                    {
+                        System.Random rand = new System.Random();
+                        int posibility = rand.Next(10);
+                        if (posibility <= 4)
+                        {
+                            SpawnApples();
+                        }
+                    }
+
+                    if (remainingApples == 0)
                     {
                         SpawnApples();
                     }
-
-                    StartCoroutine(DestroyApple(index, apple));
 
                     return (true);
                 }
@@ -140,11 +250,18 @@ public class AppleController : MonoBehaviour
         return (false);
     }
 
-    IEnumerator DestroyApple(int index, GameObject apple)
+    IEnumerator DestroyEatenApples()
     {
-        yield return new WaitForSeconds(1f);
-        Apples.RemoveAt(index);
-        Destroyed.RemoveAt(index);
-        Destroy(apple);
+        yield return new WaitForSeconds(0.5f);
+        for (int index = 0; index < Destroyed.Count; index++)
+        {
+            if (Destroyed[index] == true)
+            {
+                GameObject apple = Apples[index];
+                Apples.RemoveAt(index);
+                Destroyed.RemoveAt(index);
+                Destroy(apple);
+            }
+        }
     }
 }

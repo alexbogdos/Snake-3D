@@ -32,6 +32,8 @@ public class SnakeController : MonoBehaviour
 
     void Start()
     {
+        Application.targetFrameRate = 60;
+
         targetPosition = getTargetPosition();
         previousTargetPosition = targetPosition;
     }
@@ -141,6 +143,7 @@ public class SnakeController : MonoBehaviour
 
         if ((outOfBounds == true || selfEaten == true) && runDeath == false)
         {
+            appleController.saveData();
 
             StartCoroutine(runDeathScene(0f));
             runDeath = true;
@@ -185,6 +188,7 @@ public class SnakeController : MonoBehaviour
     void growSnake()
     {
         GameObject body = Instantiate(bodyPrefab);
+
         bodyParts.Add(body);
         if (positionHistory.Count == 0)
         {
@@ -208,6 +212,7 @@ public class SnakeController : MonoBehaviour
         if (appleController.applesEaten % 5 == 0)
         {
             movementSpeed += speedStep;
+            rotationSpeed += speedStep * 1.25f;
         }
 
     }
