@@ -8,16 +8,24 @@ public class MainMenu : MonoBehaviour
 {
     [SerializeField] GameObject MainPanel;
     [SerializeField] GameObject SettingsPanel;
-    
+
+    [SerializeField] Animator screenAnimator;
+
     [SerializeField] Toggle toggleFPV;
     [SerializeField] Toggle toggleHUD;
     [SerializeField] Toggle togglePostPrc;
 
     public void GoToPlay()
     {
-        SceneManager.LoadScene(1);
+        screenAnimator.SetTrigger("Fade In");
+
+       StartCoroutine( waitTime(0.5f) );  
     }
 
+    private IEnumerator waitTime(float seconds) {
+        yield return new WaitForSeconds(seconds);
+        SceneManager.LoadScene(1);
+    }
     public void GoToSettings()
     {
         MainPanel.SetActive(false);
